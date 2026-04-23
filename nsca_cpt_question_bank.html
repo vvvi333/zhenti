@@ -1,0 +1,371 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.container { padding: 1rem 0; }
+.header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+.stats { display: flex; gap: 8px; margin-left: auto; }
+.stat { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 4px 12px; font-size: 13px; color: var(--color-text-secondary); }
+.stat span { font-weight: 500; color: var(--color-text-primary); }
+.controls { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+.filter-btn { padding: 6px 14px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-primary); font-size: 13px; cursor: pointer; color: var(--color-text-secondary); transition: all 0.15s; }
+.filter-btn.active { background: var(--color-background-info); color: var(--color-text-info); border-color: transparent; }
+.search { flex: 1; min-width: 180px; padding: 6px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; background: var(--color-background-primary); color: var(--color-text-primary); }
+.question-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 12px; }
+.q-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 1rem; }
+.q-num { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 2px 8px; font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+.q-tag { border-radius: var(--border-radius-md); padding: 2px 8px; font-size: 11px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+.q-text { font-size: 15px; font-weight: 500; color: var(--color-text-primary); line-height: 1.5; }
+.options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; }
+.option { padding: 10px 14px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-size: 14px; color: var(--color-text-secondary); cursor: pointer; transition: all 0.15s; display: flex; gap: 10px; align-items: flex-start; }
+.option:hover { border-color: var(--color-border-secondary); background: var(--color-background-secondary); }
+.option.correct { background: var(--color-background-success); border-color: var(--color-border-success); color: var(--color-text-success); }
+.option.wrong { background: var(--color-background-danger); border-color: var(--color-border-danger); color: var(--color-text-danger); }
+.option.revealed-correct { background: var(--color-background-success); border-color: var(--color-border-success); color: var(--color-text-success); }
+.opt-label { font-weight: 500; flex-shrink: 0; }
+.toggle-btn { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 6px 12px; font-size: 13px; cursor: pointer; background: var(--color-background-secondary); color: var(--color-text-secondary); transition: all 0.15s; }
+.toggle-btn:hover { border-color: var(--color-border-secondary); }
+.explanation { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; margin-top: 10px; font-size: 13px; color: var(--color-text-secondary); line-height: 1.7; border-left: 2px solid var(--color-border-info); }
+.explanation strong { color: var(--color-text-primary); font-weight: 500; }
+.q-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.mark-btn { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 5px 10px; font-size: 12px; cursor: pointer; background: transparent; color: var(--color-text-tertiary); transition: all 0.15s; }
+.mark-btn.marked { background: var(--color-background-warning); color: var(--color-text-warning); border-color: transparent; }
+.pagination { display: flex; gap: 6px; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; align-items: center; }
+.page-btn { padding: 6px 14px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-primary); font-size: 13px; cursor: pointer; color: var(--color-text-secondary); transition: all 0.15s; }
+.page-btn.active { background: var(--color-background-info); color: var(--color-text-info); border-color: transparent; }
+.page-btn:disabled { opacity: 0.4; cursor: default; }
+.page-info { font-size: 13px; color: var(--color-text-secondary); padding: 6px 8px; }
+.category-tag { display: inline-block; }
+.cat-nutrition { background: var(--color-background-success); color: var(--color-text-success); }
+.cat-anatomy { background: var(--color-background-info); color: var(--color-text-info); }
+.cat-assessment { background: var(--color-background-warning); color: var(--color-text-warning); }
+.cat-training { background: #EAF3DE; color: #3B6D11; }
+.cat-legal { background: #FBEAF0; color: #993556; }
+.cat-safety { background: #FCEBEB; color: #A32D2D; }
+.cat-special { background: #EEEDFE; color: #534AB7; }
+.cat-facility { background: #E1F5EE; color: #0F6E56; }
+.cat-other { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+.no-results { text-align: center; padding: 3rem; color: var(--color-text-secondary); font-size: 14px; }
+</style>
+
+<div class="container">
+  <h2 class="sr-only">NSCA-CPT 真题题库 — 149道考试回忆题，含选项补充与解析</h2>
+  <div class="header">
+    <div class="title">NSCA-CPT 真题题库</div>
+    <div class="stats">
+      <div class="stat">共 <span id="total-count">149</span> 题</div>
+      <div class="stat">已标记 <span id="marked-count">0</span></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <input class="search" type="text" id="search" placeholder="搜索题目关键词..." oninput="filterQuestions()">
+    <button class="filter-btn active" onclick="setFilter('all', this)">全部</button>
+    <button class="filter-btn" onclick="setFilter('nutrition', this)">营养</button>
+    <button class="filter-btn" onclick="setFilter('anatomy', this)">解剖/生理</button>
+    <button class="filter-btn" onclick="setFilter('assessment', this)">评估</button>
+    <button class="filter-btn" onclick="setFilter('training', this)">训练</button>
+    <button class="filter-btn" onclick="setFilter('legal', this)">法律/职业</button>
+    <button class="filter-btn" onclick="setFilter('safety', this)">安全急救</button>
+    <button class="filter-btn" onclick="setFilter('special', this)">特殊人群</button>
+    <button class="filter-btn" onclick="setFilter('facility', this)">设施</button>
+    <button class="filter-btn" onclick="setFilter('marked', this)">已标记</button>
+  </div>
+
+  <div id="questions-container"></div>
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<script>
+const QUESTIONS = [
+{id:1,cat:'assessment',text:'以下哪个属于数据迁移原理？',options:['A. 皮褶测试','B. 近红外交互法','C. 水下称重','D. 生物电阻抗分析'],answer:'B',explanation:'近红外交互法（NIR）通过测量组织对近红外光的吸收与反射来估算体脂，属于"数据迁移"类方法，即间接从光学数据推算体成分。无近红外选项时，选生物电阻抗（同为间接推算原理）。'},
+{id:2,cat:'safety',text:'儿童需要心肺复苏，现场只有成人AED，应该怎么办？',options:['A. 持续心肺复苏，直到救护人员到来','B. 使用成人AED并交换为儿童电极片','C. 等待专业急救人员携带儿童AED','D. 仅做胸外按压，不使用AED'],answer:'B',explanation:'成人AED能量（150-200J）远高于儿童理想值（2-4J/kg），但研究证明：对儿童使用成人AED造成的心脏损伤，远小于"不除颤而导致死亡"的风险。应尽快使用，并换用儿童电极片降低能量输出。'},
+{id:3,cat:'training',text:'客户表示肘部屈曲超过90度会疼痛，应该禁止做哪项运动？',options:['A. 坐姿划船','B. 高位下拉','C. 拉力器下拉','D. 器械直臂上拉'],answer:'A',explanation:'坐姿划船（Seated Row）在拉到最近端时肘关节屈曲明显超过90°，会直接引发疼痛。高位下拉和拉力器下拉在终末位置肘屈也超过90°，但通常可在90°前停止。无坐姿划船选项时，选高位下拉。'},
+{id:4,cat:'training',text:'膝关节手术后有医生许可，需要避免剪切力，应该怎么运动？',options:['A. 半蹲（0-60°闭链）','B. 匀速全范围运动','C. 可变阻力膝关节屈伸','D. 开链腿弯举训练'],answer:'A',explanation:'闭链动作（脚固定）时，股四头肌与腘绳肌共同收缩，互相抵消剪切力，保护韧带。半蹲限制在0-45°或0-60°，避开膝关节受压最大的深角度，是术后最安全的进阶起点。'},
+{id:5,cat:'nutrition',text:'链球运动员114kg，每天吃6000kcal（蛋白质15%，碳水45%），体脂30%，每周3次抗阻+3次专项训练，如何改善身体成分？',options:['A. 减少总摄入量','B. 增加蛋白质摄入','C. 增加有氧训练','D. 减少碳水化合物'],answer:'B',explanation:'6000kcal×15%÷4÷114kg ≈ 1.97g/kg，高强度训练运动员推荐蛋白质摄入为≥2.0g/kg。他目前蛋白质略低，增加蛋白质有助于维持/增加肌肉量，改善体成分比。'},
+{id:6,cat:'training',text:'网球运动员，VO₂max约47ml/kg/min，深蹲1RM=60kg（体重80+kg），准备首次锦标赛，教练应给什么训练计划？',options:['A. 增肌训练','B. 有氧训练','C. 力量训练','D. 专项技术训练'],answer:'C',explanation:'VO₂max 47ml属中等偏上，有氧基础够用。但深蹲1RM不足1倍体重（NSCA标准下肢力量基准为≥1.5倍体重），是明显短板。球场急停、爆发力和伤病预防都依赖基础力量，优先补强力量。'},
+{id:7,cat:'assessment',text:'以下哪个是最适合老年人的有氧能力测试？',options:['A. Rockport 1英里步行测试','B. 12分钟跑步测试','C. 1.5英里计时跑','D. 台阶测试'],answer:'A',explanation:'Rockport步行测试只需快走1英里，通过步行时间+心率推算VO₂max，安全低冲击，适合老年人、体能较差者或康复期人群。跑步类测试对老年人风险较高。'},
+{id:8,cat:'facility',text:'训练空间中一个人的拉伸活动面积应该是多少？',options:['A. 49平方英尺（约4.6平方米）','B. 36平方英尺（约3.3平方米）','C. 64平方英尺（约5.9平方米）','D. 25平方英尺（约2.3平方米）'],answer:'A',explanation:'NSCA设施标准规定，每人拉伸所需最小活动面积为49平方英尺（约4.6平方米，即7×7英尺），以确保四肢充分伸展而不碰到他人或器材。'},
+{id:9,cat:'training',text:'如何提高划船机（ergometer）的功率输出？',options:['A. 增加阻力，减少滑动时间（更快收桨）','B. 减少阻力，增加划频','C. 保持阻力不变，增加划程长度','D. 降低阻力，延长每次滑动时间'],answer:'A',explanation:'功率=力×速度。增加飞轮阻力（增大力），同时加快收桨速度（减少滑动时间），两者相乘使每桨功率显著提升。这是划船机功率训练的核心原则。'},
+{id:10,cat:'training',text:'过度有氧训练（过度训练综合征）的典型症状是？',options:['A. 静息心率升高，入睡困难','B. 静息心率降低，食欲大增','C. 肌肉围度快速增长','D. 运动中心率异常偏低'],answer:'A',explanation:'过度训练使交感神经持续亢奋，导致静息心率升高（比平时高5-10次/分为警示信号）、睡眠质量下降（入睡难、早醒）、情绪低落和成绩下滑。这是最典型的两个症状。'},
+{id:11,cat:'facility',text:'关于AED放置位置的正确描述是？',options:['A. 方便轮椅使用者取用（高度适宜）','B. 从任何位置30秒内可到达','C. 仅放置在急救室内','D. 从任何位置90秒内可到达'],answer:'A',explanation:'NSCA设施标准：AED应放置在从任何位置90秒内可取到之处（非30秒），且高度须方便轮椅使用者操作。若选项有"90秒到达"则优先，无此选项时选"方便轮椅使用"。'},
+{id:12,cat:'safety',text:'客户出现呼吸急促、背部疼痛、恶心、颈部放射性疼痛，最可能是？',options:['A. 心脏病发作（心肌梗死）','B. 高血压危象','C. 低血糖反应','D. 肌肉拉伤'],answer:'A',explanation:'背部/颈部/左臂放射性疼痛+呼吸急促+恶心是心肌梗死的经典"非典型症状"组合（尤其在女性中常见）。教练应立即停止训练，拨打急救电话，准备AED。'},
+{id:13,cat:'legal',text:'医生将客户转介给教练时，应签署哪份文件？',options:['A. HIPAA健康信息保密协议','B. 知情同意书','C. 训练计划确认书','D. 健康风险豁免声明'],answer:'A',explanation:'HIPAA（美国健康保险可携性和责任法案）规定，医生向第三方（含私人教练）共享患者健康信息前，必须获得患者书面授权。这是保护患者隐私的法律文件，必须在信息流转前签署。'},
+{id:14,cat:'special',text:'孕妇在怀孕几个月后不可使用仰卧位训练？',options:['A. 三个月（孕中期开始，约第13周）后','B. 六个月后','C. 整个孕期均不可仰卧','D. 任何时候仰卧都安全'],answer:'A',explanation:'孕中期（约第13周）起，子宫增大可压迫下腔静脉，仰卧位会减少静脉回流，导致母体血压下降和胎儿供氧不足（仰卧位低血压综合征）。此后应避免仰卧超过几分钟。'},
+{id:15,cat:'special',text:'孕妇应立即停止训练的情况是？',options:['A. 先兆子痫（妊娠高血压+蛋白尿）','B. 轻度呼吸加速','C. 心率超过140次/分','D. 出现轻微背痛'],answer:'A',explanation:'先兆子痫是妊娠期严重并发症（高血压+蛋白尿+可能的器官损伤），运动会进一步升高血压，危及母婴。其他绝对禁忌还包括：阴道流血、羊水破裂、早产迹象、胎动明显减少等。'},
+{id:16,cat:'special',text:'孕妇有氧训练推荐的频率和时长是？',options:['A. 每周5天，每天30分钟','B. 每周3天，每天60分钟','C. 每周7天，每天20分钟','D. 每周2天，每天45分钟'],answer:'A',explanation:'ACOG（美国妇产科学会）建议：无并发症的孕妇每周至少进行150分钟中等强度有氧运动，分配为每周5天×30分钟，是NSCA推荐的标准方案。'},
+{id:17,cat:'nutrition',text:'孕妇每天需要额外补充多少热量？',options:['A. 约300千卡/天','B. 约500千卡/天','C. 约100千卡/天','D. 不需要额外补充'],answer:'A',explanation:'孕中期及晚期每天需额外摄入约300千卡来支持胎儿生长和母体代谢增加。孕早期额外需求较少（约0-100kcal），孕中晚期稳定在300kcal/天。'},
+{id:18,cat:'anatomy',text:'抗阻训练引起肌肥大的主要生理机制是？',options:['A. II型肌纤维横截面积增大','B. 肌纤维数量增多（肌纤维增生）','C. I型肌纤维横截面积增大','D. 运动单位募集效率提升'],answer:'A',explanation:'肌肥大的核心是II型肌纤维（快肌，爆发型）横截面积的增大——肌原纤维蛋白（肌动蛋白+肌球蛋白）合成增加，肌节数量增多。I型纤维也可适度增大，但贡献远小于II型。'},
+{id:19,cat:'training',text:'肩关节受伤后，以下哪个动作相对安全可以练习？',options:['A. 坐姿划船（水平拉）','B. 肩外展（侧平举）','C. 推举（overhead press）','D. 哑铃飞鸟'],answer:'A',explanation:'肩关节受伤时，肩部上举（推举、侧平举）和内外旋大幅运动会加剧撞击或肌腱炎症。坐姿划船主要在肩关节中立至水平内收范围，肱骨外展角度小，对受伤肩关节刺激最小。'},
+{id:20,cat:'anatomy',text:'水中运动时的心率与地面相比如何？',options:['A. 比地面低约10次/分','B. 与地面相同','C. 比地面高约10次/分','D. 因人而异，无规律'],answer:'A',explanation:'水中有三大因素使心率偏低：①水压促进静脉回流（心脏每搏量增大，心率代偿性降低）；②水温冷却身体，降低代谢需求；③浮力减少体重负荷。水中最大心率约比陆地低10-13次/分，计算强度时需调整。'},
+{id:21,cat:'anatomy',text:'蛙泳的主要发力肌肉群是？',options:['A. 背阔肌（下拉水期主动肌）','B. 前锯肌','C. 三角肌','D. 胸大肌'],answer:'A',explanation:'蛙泳划水阶段：手从外侧向内收拢，主要动作为肩内收+肩伸展，背阔肌是最大的动力来源；其次是胸大肌（肩内收）和肱二头肌（肘屈配合）。前锯肌和三角肌是辅助稳定肌。'},
+{id:22,cat:'facility',text:'健身房镜子下沿距地面的高度应该是？',options:['A. 20英寸（约51厘米）','B. 6英寸（约15厘米）','C. 36英寸（约91厘米）','D. 12英寸（约30厘米）'],answer:'A',explanation:'NSCA设施标准：镜子下沿距地面≥20英寸（51cm），确保用户可以看到全身动作（含最低位深蹲等），同时避免镜子被设备遮挡影响视线。'},
+{id:23,cat:'training',text:'抗阻训练动作的正确顺序是？',options:['A. 爆发/力量动作 → 核心动作 → 辅助动作','B. 辅助动作 → 核心动作 → 爆发动作','C. 核心动作 → 爆发动作 → 辅助动作','D. 有氧热身 → 爆发动作 → 核心动作'],answer:'A',explanation:'NSCA推荐顺序原则：①爆发/力量（需要最高神经激活，状态最佳时做）→ ②多关节核心动作（深蹲/卧推/硬拉等）→ ③单关节辅助动作（弯举/飞鸟等）。疲劳随训练推进，复杂高风险动作先做。'},
+{id:24,cat:'legal',text:'私人教练执业范围的正确描述是？',options:['A. 激励、评估、训练、管理','B. 激励、评估、训练、指导','C. 诊断、评估、训练、营养','D. 激励、康复、训练、指导'],answer:'B',explanation:'NSCA定义私人教练的四大职责：激励（Motivate）、评估（Assess）、训练（Train）、指导（Educate/Guide）。"管理"属行政层面，不在教练对客户的专业服务范畴内。注意教练不可做诊断和临床营养处方。'},
+{id:25,cat:'legal',text:'教练因过失行为被起诉，适用哪类法律？',options:['A. 侵权法（Tort Law）','B. 刑法（Criminal Law）','C. 劳动法（Labor Law）','D. 合同法（Contract Law）'],answer:'A',explanation:'侵权法处理因疏忽、过失或故意不当行为造成他人伤害的民事责任。私人教练在训练中因过失导致客户受伤，属于民事侵权（Negligence Tort），由侵权法管辖，客户可提起民事诉讼索赔。'},
+{id:26,cat:'legal',text:'教练疏忽导致的意外伤害，侵犯的是哪个法律范畴？',options:['A. 侵权法','B. 刑法','C. 合同法','D. 行政法'],answer:'A',explanation:'疏忽（Negligence）是侵权法的核心内容。教练对客户有"谨慎注意义务"，若违反此义务导致伤害，即构成疏忽侵权，受害方可通过民事侵权法寻求损害赔偿。'},
+{id:27,cat:'legal',text:'民法（Civil Law）包括哪些内容？',options:['A. 侵权法和合同法','B. 刑法和行政法','C. 侵权法和刑法','D. 合同法和行政法'],answer:'A',explanation:'民法（Civil Law）主要涵盖两大领域：①侵权法（Tort Law）——处理因过失/伤害引起的赔偿纠纷；②合同法（Contract Law）——处理合同条款的履行与违约纠纷。这两类是教练最常遇到的法律情境。'},
+{id:28,cat:'legal',text:'在法庭上证明教练存在过失，需要满足哪四个要素？',options:['A. 责任义务、失职、因果关系、损害','B. 意图、失职、证据、损害','C. 合同、违约、证据、赔偿','D. 动机、行为、结果、赔偿'],answer:'A',explanation:'过失四要素（必须全部满足才能胜诉）：①Duty（责任义务）——教练对客户有注意义务；②Breach（失职）——违反了该义务；③Causation（因果关系）——违约行为直接导致伤害；④Damages（损害）——存在实际伤害/损失。'},
+{id:29,cat:'training',text:'划船机（Rowing Ergometer）动作的正确发力顺序是？',options:['A. 先蹬腿（伸髋伸膝），再拉手（屈肘）','B. 先屈肘拉手，再蹬腿','C. 蹬腿与拉手同时进行','D. 先挺背，再蹬腿，最后拉手'],answer:'A',explanation:'划船机正确序列：①蹬腿（伸膝伸髋）——利用最大肌群产生动力；②挺背（脊柱后倾）；③屈肘拉桨——手臂最后发力。此顺序从大肌群到小肌群，最大化功率输出，避免手臂过早疲劳。'},
+{id:30,cat:'legal',text:'客户30年前是运动员但已多年不运动，对教练最大的挑战及最佳应对是？',options:['A. 严格控制训练环境，完全主导训练计划','B. 控制训练环境，同时允许客户参与部分决策','C. 放弃控制，让客户完全主导训练','D. 完全按客户的过去经验安排训练'],answer:'B',explanation:'前运动员往往有强烈的自主意识和过去的成功经验，但体能已退化。最佳方式：教练保持专业主导（安全+科学），同时给予客户适度的参与感（自主性+尊重），提升依从性，避免因过于强硬或过于放纵导致受伤或放弃。'},
+{id:31,cat:'training',text:'高抬腿跑属于训练中的哪个环节？',options:['A. 动态拉伸（Dynamic Stretching）','B. 静态拉伸','C. PNF拉伸','D. 弹震式拉伸'],answer:'A',explanation:'高抬腿通过主动的髋屈运动，动态拉伸腘绳肌和臀部肌群，同时激活髋屈肌，属于动态拉伸。常用于热身阶段，比静态拉伸更能激活神经肌肉系统，适合运动前使用。'},
+{id:32,cat:'training',text:'双手向前平举，行进中抬高腿部踢手，这属于哪种运动？',options:['A. 动态拉伸','B. 弹震拉伸（Ballistic Stretching）','C. PNF拉伸','D. 静态拉伸'],answer:'A',explanation:'"踢腿触手"是控制性的主动运动，通过全范围动作拉伸腘绳肌，属于动态拉伸。区别：弹震拉伸是快速反弹/弹跳动作（有惯性），而踢腿触手是受控的摆腿，节奏可控，不依赖惯性冲击。'},
+{id:33,cat:'anatomy',text:'系统性抗阻训练后，肌腱（结缔组织）的适应是？',options:['A. 更容易损伤','B. 胶原蛋白减少','C. 与运动类型和强度有关','D. 胶原蛋白密度增加且均匀'],answer:'C',explanation:'结缔组织适应具有高度特异性。适度规律的训练→胶原合成增加，肌腱强度提升。过度训练或突然高负荷→胶原排列紊乱，损伤风险增加。因此"适应结果"取决于训练的类型（拉伸/压缩）和强度（适度/过度）。'},
+{id:34,cat:'training',text:'图片中客户壶铃抓举到头顶时肘关节弯曲，这个动作的错误是？',options:['A. 肘关节未锁定（应完全伸直）','B. 握距过窄','C. 核心未收紧','D. 壶铃位置偏移重心'],answer:'A',explanation:'壶铃抓举（Kettlebell Snatch）过顶支撑阶段，肘关节必须完全伸直（锁定），形成稳固的骨骼支撑结构。屈肘会将力量转移到关节软组织，导致肩肘损伤，且表示没有完成动作。'},
+{id:35,cat:'training',text:'会员跑步时前脚掌落地，小腿疼痛，应该如何改善？',options:['A. 改为从足中部（中足）过渡到前脚掌落地','B. 增加步频','C. 减少每步的触地时间','D. 改为脚跟落地'],answer:'A',explanation:'纯前脚掌落地会使小腿肌（腓肠肌/比目鱼肌）和跟腱持续高负荷，导致疲劳性疼痛。改为中足落地→过渡到前脚掌的"滚动"方式，可分散冲击力，降低小腿单独承受的压力，是更自然的跑步模式。'},
+{id:36,cat:'assessment',text:'客户初次咨询时的填表顺序是？',options:['A. PAR-Q → 健康/医疗问卷 → 测试评估表','B. 健康/医疗问卷 → PAR-Q → 测试评估表','C. 测试评估表 → PAR-Q → 健康/医疗问卷','D. PAR-Q → 测试评估表 → 健康/医疗问卷'],answer:'A',explanation:'正确顺序：①PAR-Q（身体活动准备问卷）——快速筛查是否需要医生许可；②健康/医疗问卷——详细了解病史和风险因素；③态度/目标问卷；④体能测试评估表。先筛查再深入，确保安全。'},
+{id:37,cat:'legal',text:'为最大限度降低教练面临法律纠纷的风险，应与客户签订什么文件？',options:['A. 训练合同（Service Contract）','B. 保密协议（NDA）','C. 健康评估问卷','D. 免责声明（Waiver）'],answer:'A',explanation:'训练合同明确规定双方权利义务（服务内容、时长、费用、违约条款），是保护教练的核心法律文件。注意：免责声明（Waiver）可减少但不能完全消除法律责任，而合同是建立法律关系的基础。'},
+{id:38,cat:'training',text:'客户肩袖康复后想强化肩袖肌群，应推荐哪个动作？',options:['A. 肘关节屈90°，肩关节外旋','B. 侧平举（肩外展）','C. 坐姿划船','D. 俯身飞鸟'],answer:'A',explanation:'肩袖由冈上肌、冈下肌、小圆肌、肩胛下肌组成，核心功能是稳定肱骨头+肩关节旋转。肘屈90°下的肩外旋直接针对冈下肌和小圆肌（最主要的外旋肌），是肩袖强化的经典康复/预防动作。'},
+{id:39,cat:'legal',text:'教练专精老年人训练，来了想增肌参赛的年轻客户，最佳做法是？',options:['A. 咨询有竞技增肌经验的同行教练','B. 直接接受客户并开始训练','C. 两个教练轮流培训（协作模式）','D. 拒绝接受该客户'],answer:'A',explanation:'NSCA强调教练应在执业范围（Scope of Practice）内工作。当客户需求超出自己的专业经验范围时，应向有相关经验的同行寻求咨询或转介，这既保护了客户安全，也体现了专业责任感。'},
+{id:40,cat:'legal',text:'客户有医生运动许可但尚未开始训练，最适合的教练方式是？',options:['A. 采用协作方式，双教练共同制定','B. 以客户目标为导向制定训练计划','C. 先进行完整体能评估再开始','D. 参考医生建议制定保守计划'],answer:'B',explanation:'已有医生许可意味着安全门槛已过。此阶段重点是了解客户的个人目标、动机和偏好，以目标为导向制定个性化计划，提升参与动力和长期依从性。这是客户中心（client-centered）教练理念的体现。'},
+{id:41,cat:'training',text:'客户经训练可在跑步机上步行3英里，下次进阶的合理目标是多少英里？',options:['A. 3.3英里（增加约10%）','B. 4.0英里（增加约33%）','C. 5.0英里（增加约67%）','D. 3.5英里（增加约17%）'],answer:'A',explanation:'NSCA/ACSM运动进阶原则：每次进阶幅度不超过10%，以让身体适应新负荷并降低过度使用伤害风险。3英里×110%≈3.3英里，是安全且科学的下次目标。'},
+{id:42,cat:'facility',text:'举重比赛场馆使用15厘米高的垫子，场馆净高应至少是多少？',options:['A. 4.1米','B. 2.1米','C. 3.7米','D. 2.7米'],answer:'A',explanation:'NSCA举重设施标准净高要求≥3.96米（约13英尺）。加上15cm垫子后，举重运动员站立并把杠铃举过头顶的最大高度约4.0-4.1m，因此场馆净高须≥4.1m以保证安全空间。'},
+{id:43,cat:'training',text:'客户有较严重的驼背（胸椎过度后凸），应重点做哪个训练？',options:['A. 坐姿划船（强化上背部菱形肌/中下斜方肌）','B. 坐姿推胸（强化胸大肌）','C. 高位下拉','D. 耸肩（强化斜方肌上束）'],answer:'A',explanation:'驼背成因：胸肌/前锯肌过紧，菱形肌/中下斜方肌薄弱。坐姿划船主要激活菱形肌和中下斜方肌，使肩胛骨内收，直接对抗圆肩前倾，是矫正驼背最有针对性的动作。同时应拉伸胸肌。'},
+{id:44,cat:'safety',text:'客户跑步时突发癫痫，教练应该怎么做？',options:['A. 清理现场障碍物，保护客户免受二次伤害','B. 抱住客户，限制抽搐动作','C. 往客户嘴里放物品防止咬舌','D. 立即进行心肺复苏'],answer:'A',explanation:'癫痫急救三原则：①不要约束（抽搐是神经放电，强制约束会造成骨折）；②不要塞口（现代医学证实这会导致牙齿断裂/误吸）；③清理周围障碍，保护头部，侧卧位防误吸，计时并等待急救。'},
+{id:45,cat:'assessment',text:'含血压、仰卧起坐（肌肉耐力）、坐位体前屈（柔韧性）的评估，正确顺序是？',options:['A. 血压 → 坐位体前屈 → 仰卧起坐','B. 血压 → 仰卧起坐 → 坐位体前屈','C. 坐位体前屈 → 血压 → 仰卧起坐','D. 仰卧起坐 → 坐位体前屈 → 血压'],answer:'A',explanation:'NSCA体能测试顺序：①静息指标（血压/心率）；②非疲劳性测试（柔韧性/体成分）；③肌肉力量；④肌肉耐力；⑤有氧能力。坐位体前屈（柔韧性/非疲劳）在仰卧起坐（肌肉耐力/疲劳性）之前。'},
+{id:46,cat:'assessment',text:'以下哪个属于体能评估测试的目的？',options:['A. 建立基线水平，确定起点','B. 激励客户进行极限训练','C. 替代医学检查','D. 对客户进行医学诊断'],answer:'A',explanation:'体能测试的主要目的：①建立基线（确定现在水平）；②识别薄弱环节；③制定个性化训练计划；④追踪进展；⑤激励客户。"建立基线"是最基础也是最核心的目的。'},
+{id:47,cat:'training',text:'以下哪项运动对提升骨密度最有帮助？',options:['A. 游泳','B. 划船','C. 跑步','D. 骑自行车'],answer:'C',explanation:'骨密度提升需要"负重+冲击"刺激——骨骼受到机械应力后会适应性增加矿物质沉积。跑步有持续的体重负荷和轻度冲击，显著优于游泳（浮力消除重力）和骑车（坐姿，无垂直冲击）。'},
+{id:48,cat:'nutrition',text:'客户24小时饮食回顾：训练后吃20g蛋白+40g碳水，早餐低脂酸奶燕麦，午餐鸡排三明治，下午蛋白棒，晚餐意大利肉酱面，晚上加餐全麦面包，可以做什么调整？',options:['A. 增加训练后蛋白质摄入量','B. 将碳水化合物替换为高纤维碳水','C. 将碳水化合物替换为无麸质食品','D. 减少总热量摄入'],answer:'B',explanation:'该饮食中白面包、意大利面等精制碳水较多，高纤维碳水（全谷物、豆类、蔬菜）消化更慢，有助于血糖稳定、增加饱腹感、改善肠道健康。无麸质替换没有充分依据（非乳糜泻患者不必要）。'},
+{id:49,cat:'assessment',text:'客户有多项心血管风险因素，已有医生书面许可，问下一步应该怎么做？',options:['A. 直接开始中等强度有氧训练','B. 立即制定训练计划','C. 询问医师是否有运动禁忌症或注意事项','D. 直接进行体能评估'],answer:'C',explanation:'虽然有医生书面许可，但高心血管风险客户可能有特定的运动禁忌（如禁止特定动作、特定强度上限）。教练应主动与医生沟通确认细节，确保训练在医学安全边界内，这是负责任的职业行为。'},
+{id:50,cat:'anatomy',text:'海豹式拉伸（俯卧上身后仰撑地）主要拉伸的是哪个部位？',options:['A. 腹部（腹直肌/腹外斜肌）','B. 背阔肌','C. 胸大肌','D. 髂腰肌'],answer:'A',explanation:'海豹式（Seal Stretch）：俯卧，双手撑地，上身后仰，骨盆紧贴地面。该姿势使腹部被动拉长，主要拉伸腹直肌和腹外斜肌，同时轻度拉伸髂腰肌。背阔肌在此姿势中不是主要拉伸目标。'},
+{id:51,cat:'training',text:'背部伸展（罗马椅）训练中出现肚脐离垫的错误，应该放松哪些肌肉？',options:['A. 髂腰肌（髋屈肌）','B. 腹横肌','C. 腘绳肌','D. 臀大肌'],answer:'A',explanation:'肚脐离垫（骨盆前倾/腰椎过伸）是因为髂腰肌和竖脊肌过紧，拉动骨盆向前翻转。解决方法：放松/拉伸髂腰肌+竖脊肌，同时强化腹横肌和臀大肌来对抗骨盆前倾。'},
+{id:52,cat:'training',text:'僵尸蹲（Zombie Squat）的最高进阶动作是？',options:['A. 双臂举高过头','B. 站立时单腿站立','C. 下蹲过程中单腿支撑','D. 在不稳定表面进行僵尸蹲'],answer:'C',explanation:'僵尸蹲进阶顺序：基础双腿（手臂前伸）→ 双腿+提踵 → 单腿站立 → 深蹲过程中单腿（最高难度，同时考验力量、平衡和本体感觉）。深蹲中单腿是最大挑战。'},
+{id:53,cat:'safety',text:'学员在次最大有氧强度测试中面色潮红、喘不过气，教练应该怎么做？',options:['A. 立刻停止测试，启动应急预案','B. 适当降低强度，继续测试','C. 鼓励学员坚持完成测试','D. 暂停测试，给学员喝水后继续'],answer:'A',explanation:'面色潮红（血管扩张失控）+呼吸严重困难是心血管应激或热射病的警示信号，已超出"次最大强度"的正常反应范围。教练的首要职责是安全，应立即停止，评估状态，必要时拨打急救电话。'},
+{id:54,cat:'training',text:'下背痛患者应重点强化哪块肌肉？',options:['A. 腹横肌（深层核心稳定肌）','B. 腘绳肌','C. 股四头肌','D. 竖脊肌'],answer:'A',explanation:'腹横肌是腹部最深层的肌肉，围绕脊柱形成"天然腰带"，是脊柱稳定的关键。下背痛通常与腹横肌激活不足有关，强化腹横肌可增加腰椎内压稳定性，有效缓解和预防下背痛。'},
+{id:55,cat:'training',text:'使用髋屈器械时应注意什么？',options:['A. 器械旋转轴须与髋关节轴线对齐','B. 脚踝固定带尽量靠近膝盖','C. 背靠垫保持腰椎前凸','D. 动作范围越大越好'],answer:'A',explanation:'任何关节器械的关键设置：器械的旋转轴（pivot axis）必须与目标关节（髋关节）的旋转轴对齐。轴线偏移会导致关节内出现剪切力，加速关节磨损，增加受伤风险。'},
+{id:56,cat:'training',text:'客户想增肌和改善心血管，已训练12周（每周有氧5次+力量2次），力量和有氧指标均有改善，接下来应该怎么练？',options:['A. 保持现有计划，继续12周','B. 增加抗阻训练频率，减少有氧训练','C. 全部改为抗阻训练，训练16周','D. 增加有氧强度，维持力量频率'],answer:'B',explanation:'目前有氧5次:力量2次的比例，严重偏向有氧，不利于增肌目标。已完成12周基础期，心血管能力已有提升。下一阶段应重新平衡比例，增加力量训练频率（如3-4次/周）并适当减少有氧，才能更有效实现增肌目标。'},
+{id:57,cat:'special',text:'老年人虚弱无力、失去平衡感、无法爬楼梯，教练应该怎么训练？',options:['A. 坐姿辅助深蹲 + 双腿平衡板训练','B. 台阶训练 + 单腿平衡训练','C. 卧式腿举 + 静态站立平衡','D. 弹力带坐姿腿伸展 + 座椅稳定练习'],answer:'B',explanation:'训练特异性原则（SAID原则）：训练动作应尽量模拟目标功能活动。爬楼梯=单腿支撑+台阶高度，因此台阶训练（Step-up）直接模拟动作；单腿平衡训练改善动态平衡，两者结合最有针对性。'},
+{id:58,cat:'special',text:'有心脏病但允许训练的老年人，训练强度应该是？',options:['A. 20次×30-40%1RM','B. 8次×40-50%1RM','C. 5次×60-70%1RM','D. 15次×20-30%1RM'],answer:'B',explanation:'NSCA对心脏病稳定期且有医生许可患者的推荐：从低强度（30-40%）起步，病情稳定后进展至40-50%×8-10次，是安全有效的训练区间。60-70%对心脏病患者风险过高。具体视病情阶段判断。'},
+{id:59,cat:'training',text:'40岁客户各项指标略有小问题但风险低，最初开始有氧的推荐强度范围？',options:['A. 最大心率的40-50%','B. 最大心率的60-70%','C. 最大心率的80%以上','D. 最大心率的70-80%'],answer:'A',explanation:'对于初次开始运动或有轻度健康问题的成人，ACSM/NSCA建议从40-50%HRmax（非常轻松-轻松）开始，让心脏和肌肉骨骼系统在低风险状态下适应，4-6周后再逐步提升强度。'},
+{id:60,cat:'facility',text:'私人教练应该更频繁检查健身房的哪个维护项目？',options:['A. 拧紧器材螺丝/螺栓','B. 清洁坐垫并消毒','C. 检查跑步机传送带','D. 更换哑铃标签'],answer:'A',explanation:'器材螺丝因振动和使用会逐渐松动，松动螺丝是器材倒塌/脱落的最高风险因素，一旦发生极易造成严重伤害。NSCA要求教练定期检查所有器材的紧固件，这是最高优先级的日常维护项目。'},
+{id:61,cat:'training',text:'农夫行走（Farmer\'s Walk）的主要训练效果是？',options:['A. 提高躯干额状面（侧向）抗侧屈稳定性','B. 提高矢状面核心稳定性','C. 强化脊柱屈曲力量','D. 改善踝关节灵活性'],answer:'A',explanation:'农夫行走中，单侧（或双侧）持重物，重力产生侧屈力矩，身体必须持续对抗以保持直立，核心侧链（腰方肌、腹外斜肌、多裂肌）高度激活。额状面（侧向）抗侧屈稳定是其最突出的训练价值。'},
+{id:62,cat:'legal',text:'初次会谈确定教练与客户适合度时，最先应该执行什么？',options:['A. 向客户提供服务的具体细节（介绍服务内容）','B. 进行体能评估','C. 签署训练合同','D. 了解客户的健康病史'],answer:'A',explanation:'初次会谈（Initial Consultation）的首要任务是建立信任和了解彼此是否匹配，因此教练应先清晰介绍自己能提供的服务内容、专业背景和工作方式，让客户了解合作框架，再进入评估和合同环节。'},
+{id:63,cat:'anatomy',text:'反握引体向上（窄距，掌心向自己）比宽握引体向上更强化哪块肌肉？',options:['A. 肱二头肌','B. 背阔肌','C. 菱形肌','D. 大圆肌'],answer:'A',explanation:'反握（掌心朝向自己）使前臂处于旋后位，肱二头肌处于最有利的力学角度（既是肘屈肌又是前臂旋后肌）。宽握正握主要激活背阔肌，而反握窄距显著增加了肱二头肌的参与度。'},
+{id:64,cat:'training',text:'应在何时使用举重腰带？',options:['A. 进行1-3RM最大力量背蹲（极高强度）时','B. 所有抗阻训练组都应佩戴','C. 有氧训练时','D. 超过10RM的高次数组时'],answer:'A',explanation:'举重腰带仅在极高强度（1-3RM，即90%+1RM）的大动作（深蹲/硬拉）中使用，此时脊柱内压需求达到极限，腰带通过增加腹内压辅助脊柱稳定。长期在低强度使用腰带会削弱核心自主稳定能力。'},
+{id:65,cat:'anatomy',text:'强化菱形肌最有效的动作是？',options:['A. 俯身杠铃划船','B. 高位下拉','C. 肩外展','D. 胸部推举'],answer:'A',explanation:'菱形肌（大/小菱形肌）的主要功能是肩胛骨内收（将肩胛骨拉向脊柱）。俯身杠铃划船在动作顶端肘向后拉，肩胛骨最大程度内收，是针对菱形肌最有效的复合动作。'},
+{id:66,cat:'anatomy',text:'冈下肌和小圆肌应该用什么动作来训练？',options:['A. 肩关节外旋动作','B. 肩关节内旋动作','C. 肩外展动作','D. 肩前屈动作'],answer:'A',explanation:'冈下肌+小圆肌的主要功能：肱骨外旋（将上臂向外旋转）。因此，针对这两块肌肉的训练动作是肩关节外旋，如：侧卧哑铃外旋、绳索站立外旋（肘屈90°）。这也是肩袖康复训练的核心动作。'},
+{id:67,cat:'anatomy',text:'深蹲过程中，哪块肌肉主要负责脊柱稳定？',options:['A. 腹横肌','B. 斜方肌','C. 背阔肌','D. 臀大肌'],answer:'A',explanation:'腹横肌（TVA）是最深层的腹部肌肉，收缩时如"束腰带"般增加腹内压，是深蹲、硬拉等轴向负荷动作中脊柱稳定的核心肌肉。它在任何重型动作启动前都应预激活（腹部预收紧）。'},
+{id:68,cat:'training',text:'使用蝴蝶机（垂直器械夹胸）时，上臂与地面的正确角度是？',options:['A. 平行于地面（水平位）','B. 45°角向上','C. 30°角向下','D. 垂直于地面'],answer:'A',explanation:'蝴蝶机夹胸的标准体位：上臂（肱骨）应与地面平行，肘关节屈曲约90°，使胸大肌处于最佳发力角度和拉伸位。上臂过高会使前锯肌代偿，过低会减少胸肌拉伸幅度。'},
+{id:69,cat:'training',text:'外翻不足（足内翻/旋后/高足弓）的人适合什么样的跑鞋？',options:['A. 曲线型（弯曲鞋底，强调缓冲）','B. 半曲线型（适合正常足弓）','C. 直线型（适合扁平足/过度外翻）','D. 任何类型均可'],answer:'A',explanation:'足内翻（旋后/高弓足）：落地时缓冲不足，冲击力无法通过足弓塌陷分散。需要曲线型鞋（最大缓冲+灵活性）来补偿。记忆口诀：外翻不足→曲线型；正常→半曲线；外翻过度（扁平足）→直线型。'},
+{id:70,cat:'training',text:'跑步机适应训练中，双手扶把后的进阶顺序是？',options:['A. 双手手指扶把','B. 立即放开双手','C. 单手扶把','D. 改变步速'],answer:'A',explanation:'完整进阶顺序：①双手全握→②双手手指扶（轻触）→③一手扶，另一手摆动→④一只手手指扶→⑤一只手一根手指扶→⑥完全不扶。循序渐进，逐步减少外部支撑依赖。'},
+{id:71,cat:'special',text:'腿部疼痛（关节问题）患者适合的运动是？',options:['A. 游泳（水中运动）','B. 跑步','C. 跳绳','D. 深蹲'],answer:'A',explanation:'游泳/水中运动的浮力可减少关节承受的体重负荷达80-90%，大幅降低腿部关节（膝、髋、踝）的压力，同时提供全身性有氧训练效果，是腿部疼痛患者最友好的运动方式。'},
+{id:72,cat:'training',text:'根据推拉原则，肱二头肌弯举（拉类，屈）之后，应选择什么动作？',options:['A. 卧推（Bench Press，推类）','B. 高位下拉（Lat Pull Down，拉类）','C. 坐姿绳索划船（拉类）','D. 哑铃飞鸟（拉类）'],answer:'A',explanation:'推拉交替原则：拉类动作（弯举）→ 推类动作（卧推），交替使用拮抗肌群，让一组肌肉在另一组工作时恢复。弯举主要用肱二头肌（拉），卧推主要用肱三头肌+胸大肌（推），完美交替。'},
+{id:73,cat:'training',text:'开始下肢快速伸缩复合（增强式）训练的条件是？',options:['A. 1RM深蹲重量≥自身体重的1.5倍','B. 有至少3年连续训练经验','C. 最大摄氧量≥42ml/kg/min','D. 能完成连续20次标准深蹲'],answer:'A',explanation:'NSCA增强式训练前提条件：下肢力量基础——深蹲1RM≥1.5倍体重（某些来源要求至少1倍体重起步）。足够的基础力量是安全吸收和利用弹性势能的前提，力量不足进行增强式训练极易造成软组织损伤。'},
+{id:74,cat:'special',text:'老年人平衡训练的正确进阶方向是？',options:['A. 双腿支撑 → 单腿支撑','B. 单腿支撑 → 双腿支撑','C. 眼睛睁开 → 增加重量','D. 不稳定面 → 稳定面'],answer:'A',explanation:'平衡训练进阶遵循"减少支撑面"原则：①双腿宽站→②双腿窄站→③半串联步（前后脚）→④串联步（脚跟对脚尖）→⑤单腿站立。另可叠加闭眼、不稳定面、加动作等变量进一步挑战。'},
+{id:75,cat:'anatomy',text:'I型胶原蛋白主要形成于哪个阶段？',options:['A. 重塑与发育阶段','B. 炎症反应阶段','C. 增殖阶段','D. 稳定期'],answer:'A',explanation:'伤口/组织愈合分三期：①炎症期（清理，分泌III型胶原）→②增殖期（大量胶原沉积）→③重塑期（III型胶原逐渐被强度更高的I型胶原替代）。I型胶原在重塑与发育阶段大量形成，决定最终组织强度。'},
+{id:76,cat:'facility',text:'按照美国残疾人法（ADA）规定，健身房通道宽度应至少是多少？',options:['A. 36英寸（约91厘米）','B. 24英寸（约61厘米）','C. 48英寸（约122厘米）','D. 60英寸（约152厘米）'],answer:'A',explanation:'ADA规定单向通道最小宽度为36英寸（91cm），以确保轮椅用户能够通行。主要通道（双向）则需60英寸（152cm）。这是NSCA设施设计的法定最低标准。'},
+{id:77,cat:'facility',text:'门厅和主要循环通道的宽度应该是多少？',options:['A. 60英寸（约152厘米）','B. 36英寸（约91厘米）','C. 48英寸（约122厘米）','D. 72英寸（约183厘米）'],answer:'A',explanation:'NSCA设施标准：健身房门厅和主要循环通道（双向人流/轮椅双向通行）的最小宽度为60英寸（152cm）。比ADA单向通道36英寸要宽，以容纳更大的人流量和双向通行需求。'},
+{id:78,cat:'facility',text:'哑铃架摆放时距离镜子应是多少？',options:['A. 6英寸（约15厘米）','B. 9英寸（约23厘米）','C. 20英寸（约51厘米）','D. 12英寸（约30厘米）'],answer:'A',explanation:'NSCA设施标准：哑铃架距离镜子6英寸（15cm）。这个距离既能让使用者站在架前时在镜中看到完整动作，又避免哑铃直接撞击镜子造成破损。'},
+{id:79,cat:'facility',text:'镜子下沿离地面的距离应该是多少？',options:['A. 20英寸（约51厘米）','B. 6英寸（约15厘米）','C. 9英寸（约23厘米）','D. 36英寸（约91厘米）'],answer:'A',explanation:'NSCA设施标准：镜子下沿距地面≥20英寸（51cm）。这样即使使用者做最低位动作（如深蹲底部），镜面也不会被器材完全遮挡，且镜子不会因底部碰撞而破损。'},
+{id:80,cat:'facility',text:'健身房抗阻器材之间的最小间隔距离是多少？',options:['A. 2英尺（约0.6米）','B. 3英尺（约0.9米）','C. 4英尺（约1.2米）','D. 1英尺（约0.3米）'],answer:'A',explanation:'NSCA设施标准：器材最小间距≥2英尺（0.6m），最佳间距≥3英尺（0.9m）。最小间距确保使用者能安全上下器材，最佳间距提供更舒适的使用空间和紧急通道。'},
+{id:81,cat:'anatomy',text:'规律有氧训练对血脂的主要适应是？',options:['A. 增加高密度脂蛋白（HDL，好胆固醇）','B. 增加低密度脂蛋白（LDL，坏胆固醇）','C. 增加甘油三酯','D. 对血脂无明显影响'],answer:'A',explanation:'规律有氧运动的血脂适应：①HDL（好胆固醇）升高——帮助清除血管壁斑块；②LDL降低；③甘油三酯降低。HDL升高是有氧运动最重要的心血管保护效果之一，也是NSCA考试重点。'},
+{id:82,cat:'training',text:'稳定球仰卧腿弯举的常见错误是？',options:['A. 髋部下沉（未能保持髋部伸直位）','B. 膝关节弯曲过度','C. 手臂用力撑地','D. 速度过快'],answer:'A',explanation:'稳定球腿弯举的标准体位：髋部应与肩膀和膝关节在同一条直线上（躯干平直）。常见错误是腿弯举时髋部下沉或屈曲，导致臀部离开"空中水平线"，大幅减少腘绳肌的工作负荷。'},
+{id:83,cat:'training',text:'中级训练者高强度有氧训练，持续时间应至少多长？',options:['A. 至少20分钟','B. 至少30分钟','C. 至少45分钟','D. 至少60分钟'],answer:'A',explanation:'NSCA对中级训练者高强度有氧的建议：每次持续时间至少20分钟（在维持目标心率区间内）。这是高强度模式的最低有效剂量，比初学者低强度（30分钟起步）更短但强度更高。'},
+{id:84,cat:'training',text:'有氧训练每次至少持续多长时间才有训练效果？',options:['A. 15分钟','B. 30分钟','C. 45分钟','D. 20分钟'],answer:'B',explanation:'ACSM/NSCA通用标准：中等强度有氧训练每次至少持续30分钟才能达到足够的心肺和代谢刺激。低于30分钟可有部分效益，但不满足"最低有效训练剂量"。高强度有氧（HIIT）可缩短至20分钟。'},
+{id:85,cat:'anatomy',text:'长期1RM力量训练对心脏的适应是？',options:['A. 心室壁增厚（向心性肥大）','B. 心室容积增大（离心性肥大）','C. 心率显著降低','D. 每搏输出量增加'],answer:'A',explanation:'力量训练（尤其是1RM高负荷）导致心脏在高血压环境中工作，心室壁通过"向心性肥大"（心室壁变厚，腔不增大）来适应。对比：有氧训练→心室腔增大（离心性肥大）+每搏量增加+静息心率降低。'},
+{id:86,cat:'legal',text:'客户私教协议（训练合同）应该在什么时候签订？',options:['A. 初次见面时','B. 完成首次体能评估后','C. 第一次正式训练前','D. 三次体验课后'],answer:'A',explanation:'训练合同应在开始任何服务之前（包括评估）签订，通常在初次见面时完成。合同保护双方权益，明确服务条款，是法律保护的第一道防线。先服务后签合同会处于无保护状态。'},
+{id:87,cat:'legal',text:'客户想了解服务描述、期限、付款方式等细节，需要签署什么文件？',options:['A. 训练合同（Service/Training Contract）','B. 知情同意书（Informed Consent）','C. 健康评估问卷','D. 保密协议（NDA）'],answer:'A',explanation:'训练合同（Service Contract）包含：服务描述、时间安排、费用与付款方式、取消政策、双方责任等商业条款。知情同意书侧重运动风险告知，两者用途不同，不可混用。'},
+{id:88,cat:'safety',text:'山羊挺身（背伸展器俯身练习）容易引起什么？',options:['A. 体位性低血压（直立性低血压）','B. 腰椎间盘突出','C. 血压骤升','D. 肌肉痉挛'],answer:'A',explanation:'山羊挺身需要头部大幅低于心脏（俯身），大量血液流向头部；直立时血液迅速回流至下肢，导致脑部一过性供血不足，出现体位性低血压（头晕、眼黑）。完成动作后应缓慢直立，避免快速抬头。'},
+{id:89,cat:'nutrition',text:'蛋白质在体内的储存形式是？',options:['A. 氨基酸（以蛋白质结构储存于肌肉等组织）','B. 糖原','C. 甘油三酯','D. 脂肪酸'],answer:'A',explanation:'蛋白质以氨基酸链（蛋白质结构）的形式"储存"于肌肉组织（约75%）、内脏、酶和激素中——人体没有独立的"蛋白质仓库"，需要时通过分解肌肉等组织中的蛋白质获取氨基酸。糖原是葡萄糖的储存形式，甘油三酯是脂肪的储存形式。'},
+{id:90,cat:'nutrition',text:'以下哪种食物属于完全蛋白质（含所有必需氨基酸）？',options:['A. 蛋类','B. 大米','C. 花生','D. 豌豆'],answer:'A',explanation:'完全蛋白质（Complete Protein）含有全部9种必需氨基酸。动物来源（蛋、奶、肉、鱼）均为完全蛋白质，其中蛋类的氨基酸评分（PDCAAS）接近满分，常作为参考标准。植物蛋白多为不完全蛋白质。'},
+{id:91,cat:'nutrition',text:'运动之后最优先补充什么营养素？',options:['A. 碳水化合物（快速补充糖原）','B. 蛋白质','C. 脂肪','D. 电解质'],answer:'A',explanation:'练后"黄金窗口"（30-60分钟内）：优先补充快碳（高GI碳水如香蕉、白米、运动饮料），迅速启动糖原再合成（胰岛素分泌峰值辅助葡萄糖转运）。同时配合蛋白质促进肌肉修复，但碳水是首要。'},
+{id:92,cat:'anatomy',text:'哪种肌肉收缩方式最容易引起延迟性肌肉酸痛（DOMS）？',options:['A. 离心收缩','B. 向心收缩','C. 等长收缩','D. 等速收缩'],answer:'A',explanation:'离心收缩（肌肉边拉长边用力，如下楼梯的股四头肌、哑铃弯举的放下阶段）产生更大的机械张力，导致肌原纤维微损伤，引发炎症反应。DOMS在训练后24-72小时达到峰值，离心动作是最主要诱因。'},
+{id:93,cat:'legal',text:'把客户不喜欢的训练动作从计划中去掉，这属于什么行为干预？',options:['A. 负强化（Negative Reinforcement）','B. 正强化（Positive Reinforcement）','C. 消退（Extinction）','D. 惩罚（Punishment）'],answer:'A',explanation:'行为主义区分：负强化=移除厌恶刺激，从而增强目标行为的发生频率。去掉客户不喜欢的动作（移除厌恶刺激）→客户更愿意来训练（训练行为增强）。这是负强化。注意：负强化≠惩罚，都是为了增加行为！'},
+{id:94,cat:'legal',text:'自我效能（Self-efficacy）是指？',options:['A. 相信自己有能力完成特定任务','B. 外部激励来源','C. 实际的体能水平','D. 对训练的享受程度'],answer:'A',explanation:'班杜拉（Bandura）提出的自我效能是指个体对自己能否成功完成某一特定任务的信念和信心，是改变运动行为最重要的心理预测因子之一。高自我效能→更愿意尝试并坚持新行为。'},
+{id:95,cat:'legal',text:'客户对训练计划每个阶段都严格管理，这属于哪种目标类型？',options:['A. 过程目标（Process Goal）','B. 绩效/表现目标（Performance Goal）','C. 结果目标（Outcome Goal）','D. 短期目标'],answer:'A',explanation:'三层目标：①过程目标——关注如何执行（每天做哪些动作、每组几次）；②表现目标——关注可量化的绩效指标（这周跑步配速）；③结果目标——关注最终结果（赢得比赛、减重20斤）。严格管理"每个阶段"属于过程目标。'},
+{id:96,cat:'legal',text:'客户更在意短期阶段内的努力程度，他更关注的是？',options:['A. 短期目标','B. 短期表现（Short-term Performance）','C. 长期目标','D. 过程目标'],answer:'B',explanation:'关键区别："短期目标"关注近期结果产出；"短期表现"关注近期执行质量和努力程度（如今天完成的组数、速度改善）。"关注努力程度"是表现导向，而非结果导向，因此选"短期表现"。'},
+{id:97,cat:'legal',text:'运动知情同意书（Informed Consent）的目的是？',options:['A. 鼓励提问并让客户知晓运动风险','B. 鼓励提问并激励运动参与','C. 激励运动参与并让客户知晓运动风险','D. 建立服务收费标准'],answer:'C',explanation:'知情同意书的两大核心目的：①让客户充分了解运动的潜在风险（知情）；②激励/鼓励客户积极参与运动（同意参与）。不是主要以"鼓励提问"为目的。'},
+{id:98,cat:'assessment',text:'评估学员的目标和训练决心，应该填写什么问卷？',options:['A. 生活方式与健康习惯问卷','B. 身体评估表','C. 目标与态度（动机）评估问卷','D. PAR-Q问卷'],answer:'C',explanation:'目标与态度（动机）评估问卷专门用于了解客户的运动目标、改变意愿、训练决心和动机类型（内在/外在）。这是制定行为改变策略和目标设定的基础，与PAR-Q（安全筛查）和身体评估表（体能数据）用途不同。'},
+{id:99,cat:'assessment',text:'哪个指标最能代表局部（相对）脂肪分布？',options:['A. 腰臀比（WHR）','B. BMI','C. 体脂率（%BF）','D. 腰围'],answer:'A',explanation:'腰臀比（Waist-to-Hip Ratio）：腰围÷臀围，反映脂肪在腹部与臀部的分布比例，是评估腹型肥胖（内脏脂肪）风险的局部相对指标。BMI和体脂率是整体指标，腰围是绝对局部指标。'},
+{id:100,cat:'training',text:'带心率监测的跑步机，哪种模式最适合客户保持特定目标心率？',options:['A. 手动模式（Manual）','B. 间隔模式','C. 随机模式','D. 坡度爬坡模式'],answer:'A',explanation:'手动模式允许教练和客户根据实时心率反馈，随时精确调整速度和坡度，从而将心率维持在特定目标区间。间隔和随机模式按预设程序自动变化，无法根据个体心率反应灵活调整。'},
+{id:101,cat:'assessment',text:'测试下肢最大力量的最佳方法是？',options:['A. 1RM腿举（蹬举）','B. 1RM后蹲（背蹲）','C. 1-3RM腿举','D. 1-3RM后蹲'],answer:'A',explanation:'NSCA推荐1RM腿举（Leg Press）用于评估下肢最大力量，原因：①安全性高（无脊柱负荷风险）；②技术要求低，适合普通客户；③可靠重复性好。后蹲1RM测试虽然更全面，但技术要求高，安全风险大，不适合作为常规评估工具。'},
+{id:102,cat:'assessment',text:'以下哪种测试用于测试有氧耐力？',options:['A. 12分钟跑（Cooper测试）','B. 卧推力量测试','C. 一分钟仰卧起坐','D. 俯卧撑测试'],answer:'A',explanation:'Cooper 12分钟跑通过12分钟内跑行的距离推算VO₂max，是经典的有氧耐力评估工具。卧推和仰卧起坐分别测力量和肌肉耐力，与有氧耐力无关。'},
+{id:103,cat:'assessment',text:'以下哪种测试用于测试肌肉耐力？',options:['A. YMCA卧推测试','B. 台阶测试','C. 腿举1RM','D. 握力测试'],answer:'A',explanation:'YMCA卧推测试：以固定重量（男性80磅/36kg，女性35磅/16kg）连续做最多次卧推，直到力竭，用次数评估上肢肌肉耐力。台阶测试测有氧能力，腿举1RM测最大力量。'},
+{id:104,cat:'legal',text:'关于未成年人训练合同签字，正确的描述是？',options:['A. 16岁前需家长/监护人签字，16岁后本人签字','B. 无论年龄，未成年人本人签字即可','C. 无论年龄，均须家长/监护人签字','D. 未成年人不允许参加训练'],answer:'A',explanation:'注意：这是NSCA考试特定答案（16岁为分界线），实际美国法律中18岁以下均视为未成年人，合同须由监护人签署。考试中按题目给出的选项判断，答案A基于题目所给选项为正确选项。'},
+{id:105,cat:'training',text:'进行静态拉伸时应注意什么？',options:['A. 缓慢进入拉伸位置，避免弹振','B. 保持拉伸至少45秒以上','C. 采用瓦氏呼吸加大拉伸深度','D. 拉伸到感到疼痛的程度'],answer:'A',explanation:'静态拉伸要点：①缓慢进入（避免激活牵张反射）；②保持15-30秒（非45秒）；③自然呼吸（非瓦氏）；④拉伸到感到轻微紧张感（非疼痛）。瓦氏呼吸可能升高血压，不安全。'},
+{id:106,cat:'training',text:'如何在跑步机上模拟室外跑步的感觉？',options:['A. 将坡度调高1度','B. 将坡度调高至10度','C. 提高速度5%','D. 关闭坡度，纯平路跑'],answer:'A',explanation:'室外跑步有空气阻力，而跑步机是封闭空气无阻力。研究表明，坡度调高约1%（1度）可以补偿缺少空气阻力的能量消耗差异，使跑步机上的生理消耗更接近室外跑步。'},
+{id:107,cat:'training',text:'客户卧推1RM为100公斤，想完成10次，重量应该是多少？',options:['A. 65公斤','B. 75公斤','C. 80公斤','D. 90公斤'],answer:'B',explanation:'NSCA次数-强度对应：1RM=100%；5次≈87%；8次≈80%（80kg）；10次≈75%（75kg）；12次≈70%（70kg）；15次≈65%（65kg）。10次对应约75%1RM，即75公斤。'},
+{id:108,cat:'anatomy',text:'俯卧撑（Push-up）主要训练的肌肉部位是？',options:['A. 胸大肌、三角肌前束、肱三头肌','B. 背阔肌、肱二头肌、三角肌后束','C. 菱形肌、斜方肌、肱三头肌','D. 胸大肌、肱二头肌、前锯肌'],answer:'A',explanation:'俯卧撑是经典的水平推类动作：主要动力肌为胸大肌（水平内收）、三角肌前束（肩屈）、肱三头肌（肘伸）。前锯肌稳定肩胛，核心肌群稳定躯干，属于辅助肌群。'},
+{id:109,cat:'anatomy',text:'俯卧撑过程中稳定肩胛骨的主要肌肉是？',options:['A. 前锯肌（Serratus Anterior）','B. 三角肌','C. 背阔肌','D. 斜方肌下束'],answer:'A',explanation:'俯卧撑下降时肩胛骨后缩，推起时肩胛骨前伸——前锯肌负责肩胛骨的前伸（伸展）和上旋，确保肩胛骨贴合胸廓、不翼状突出，是俯卧撑中最关键的肩胛稳定肌。'},
+{id:110,cat:'training',text:'客户无法完成脚放在稳定球上的俯卧撑，应该如何调整？',options:['A. 球移到更靠近小腿（降低杠杆力矩）','B. 球移到大腿根部（增加难度）','C. 改为膝盖着地俯卧撑','D. 减少俯卧撑幅度'],answer:'A',explanation:'稳定球俯卧撑：球越靠近脚踝（杠杆臂最长），难度越大；球越靠近身体重心（如大腿）难度越低。降级方法：将球从脚踝移到小腿，缩短力臂，减少核心和上肢的承重比例。'},
+{id:111,cat:'training',text:'使用器械推胸时客户肩膀疼痛，应该如何调整坐姿？',options:['A. 调整座椅使器械把手与乳头齐平','B. 升高座椅使把手高于肩膀','C. 降低座椅使把手低于腰部','D. 将靠背后倾15度'],answer:'A',explanation:'器械推胸的标准设置：座椅高度应使把手（施力点）与乳头/胸大肌中部齐平，确保推胸方向水平，手肘在肩关节以下，避免肩关节过度外展和撞击综合征。把手过高是肩痛的常见原因。'},
+{id:112,cat:'anatomy',text:'以下哪个是开链动作（Open Kinetic Chain）？',options:['A. 坐姿腿弯举（Leg Curl）','B. 深蹲','C. 腿举（Leg Press）','D. 弓步蹲'],answer:'A',explanation:'开链动作：肢体远端（手或脚）自由移动，不固定。坐姿腿弯举时脚不固定，可自由运动，属开链。深蹲和腿举时脚固定在地面/踏板，属闭链。开链更孤立单一肌肉，闭链更接近功能性动作。'},
+{id:113,cat:'safety',text:'瓦氏呼吸（Valsalva Maneuver）的禁用人群是？',options:['A. 孕妇和心血管疾病（高血压）患者','B. 老年人','C. 糖尿病患者','D. 体脂过高者'],answer:'A',explanation:'瓦氏呼吸会急剧升高胸腔内压，导致血压骤升（可达300mmHg以上），对心血管患者（尤其高血压）有脑出血/心脏事件风险；孕妇腹内压增加会压迫子宫，影响胎儿供血。这两类是绝对禁忌。'},
+{id:114,cat:'safety',text:'瓦氏呼吸（Valsalva Maneuver）危险的原因是？',options:['A. 会导致脑部短暂缺血，引起晕厥','B. 会导致心跳过速','C. 会导致肌肉抽筋','D. 会导致低血糖'],answer:'A',explanation:'机制：瓦氏→胸腔内压升高→心脏静脉回流受阻→心输出量骤降→脑部血流减少→晕厥。此外还可能导致血压先升后骤降。因此大重量力量举运动员也需在可控条件下使用。'},
+{id:115,cat:'special',text:'客户使用β阻滞剂（心脏药物），应该使用什么方法监测运动强度？',options:['A. RPE自感用力度（Borg量表）','B. 目标心率法','C. 最大摄氧量百分比','D. 谈话测试'],answer:'A',explanation:'β阻滞剂通过阻断β受体来降低心率，导致运动时心率被人为压制，目标心率法完全失效。此时应改用RPE（自我感知用力度，6-20分量表或简化10分量表）来评估运动强度，这不依赖心率。'},
+{id:116,cat:'special',text:'高血压患者运动时应该怎么监测运动强度？',options:['A. RPE自感用力度','B. 目标心率（最大心率百分比）','C. 代谢当量（METs）','D. 乳酸阈值'],answer:'A',explanation:'高血压患者常服用β阻滞剂或其他影响心率的药物，心率监测不可靠。RPE不依赖心率，可直接反映主观用力感受，是高血压、使用心血管药物者的标准运动强度监测工具。'},
+{id:117,cat:'special',text:'脊髓损伤者进行有氧运动时，如何监控运动强度？',options:['A. RPE自感用力度','B. 目标心率法','C. 步频计数','D. 血压监测'],answer:'A',explanation:'脊髓损伤（尤其T6以上）可导致自主神经功能障碍，心率对运动强度的反应异常（不随强度增加而正常升高），心率监测不可靠。RPE是此类人群评估运动强度的唯一可靠主观指标。'},
+{id:118,cat:'anatomy',text:'以下哪项与心脏病风险最相关？',options:['A. 高血压','B. 糖尿病','C. 低血压','D. 关节炎'],answer:'A',explanation:'NSCA危险因素分层：高血压是心脏病最直接的独立危险因素（长期高压损伤动脉内壁，加速动脉粥样硬化）。若选项有高血压优先选高血压。无高血压时，糖尿病也是重要风险因素。低血压不是心脏病风险因素。'},
+{id:119,cat:'special',text:'儿童进行大重量抗阻训练容易受伤的主要原因是？',options:['A. 肌肉力量不足','B. 骨骺板（生长板）尚未骨化，容易损伤','C. 动作不标准容易拉伤','D. 关节软骨发育未完全'],answer:'B',explanation:'儿童长骨末端的骨骺板（生长板）主要由软骨组成，强度远低于成熟骨组织。大重量训练产生的剪切力和压缩力可能损伤骨骺板，若未处理可导致生长畸形或停止发育（俗称"长不高"）。'},
+{id:120,cat:'training',text:'肩部前侧疼痛的客户，以下哪个动作是禁忌？',options:['A. 肱二头肌弯举（Biceps Curl）','B. 侧平举','C. 卧推（Bench Press）','D. 坐姿划船'],answer:'C',explanation:'卧推要求肩关节大幅水平外展+肩前屈，会强烈拉伸和压迫肩关节前侧（包括肱二头肌长头腱、肩前囊）。肩前侧疼痛（常见于肱二头肌腱炎、肩关节前撞击）时，卧推是首要禁忌动作。'},
+{id:121,cat:'safety',text:'炎热潮湿环境中客户突然晕倒，仍有呼吸，面色潮红全身出汗，教练应该怎么做？',options:['A. 立即给客户降温（移至阴凉处、湿毛巾、冷水）','B. 立即拨打急救电话，等待救援','C. 让客户平躺休息，补充水分','D. 马上进行心肺复苏'],answer:'A',explanation:'症状（潮红+大量出汗+意识障碍）符合热射病（重症中暑）特征。热射病是医疗紧急情况，核心是立即降温（蒸发/冰敷颈部腋下腹股沟），降温是存活的关键，同时呼叫急救。'},
+{id:122,cat:'safety',text:'学员面红、头晕、呼吸困难，等待急救期间应该进行什么措施？',options:['A. 持续给学员降温','B. 让学员坐下休息','C. 陪伴学员等待','D. 给学员喝大量冰水'],answer:'A',explanation:'中暑急救中，降温是最核心的干预措施——每延误1分钟降温，脏器损伤风险就增加。应持续降温（移至阴凉处、用湿毛巾擦拭、开风扇吹风）直到急救人员到达，不能仅静待。'},
+{id:123,cat:'legal',text:'客户有背痛，评估为低风险，有医生运动许可，但客户表示想等检查结果出来后再签知情同意书，教练应该怎么做？',options:['A. 先开始训练计划','B. 直接要求医生提供运动许可','C. 等客户完成就诊后再安排初次见面','D. 签临时协议先进行评估'],answer:'C',explanation:'客户明确表示要等待检查结果，说明他/她认为目前信息不完整。教练应尊重客户意愿，等其完成医学检查、获得完整信息后再进行初次见面，这也确保教练在完整健康信息基础上制定安全计划。'},
+{id:124,cat:'assessment',text:'力量测试的最佳准确性范围是？',options:['A. 1RM（最大单次重复）','B. 1-3RM','C. 5-10RM','D. 10-15RM'],answer:'A',explanation:'1RM是力量测试的金标准，直接测量最大绝对力量，无需使用预测公式，误差最小。1-3RM引入少量预测误差，仍属可接受范围，常用于安全考量较高时。高次数（10RM+）预测1RM误差显著增大。'},
+{id:125,cat:'legal',text:'某会员在健身房讲黄色笑话被投诉，责任方是？',options:['A. 讲笑话的会员、在场的教练、健身房管理方','B. 仅讲笑话的会员','C. 仅健身房管理方','D. 教练和健身房，不包括会员'],answer:'A',explanation:'性骚扰/不当言论的法律责任采用"共同责任"原则：①会员（直接行为者）；②在场教练（有制止义务而未制止）；③健身房（未建立防骚扰制度或未采取行动）。三方均可能承担法律责任。'},
+{id:126,cat:'legal',text:'为避免教练被成功起诉（降低法律风险），最重要的首要措施是？',options:['A. 认真专业地指导每位客户','B. 先进行完整的健康评估','C. 让客户签署免责协议','D. 购买职业责任保险'],answer:'B',explanation:'健康评估是法律保护的第一道防线——它证明教练在开始训练前尽到了"谨慎注意义务"（识别风险、转介高风险客户）。若没有健康评估就训练导致意外，教练很难证明自己尽职。评估先于一切。'},
+{id:127,cat:'nutrition',text:'网球比赛中场休息1小时，应该吃什么补给？',options:['A. 百吉饼配蜂蜜（高GI快碳）','B. 鸡肉三明治（高蛋白）','C. 蛋白棒','D. 坚果和奶酪'],answer:'A',explanation:'1小时内的比赛间歇：核心需求是快速补充消耗的糖原，维持血糖稳定。百吉饼（低纤维精制碳水）+蜂蜜（葡萄糖+果糖）是高GI快速能量来源，易消化不会引起胃肠不适。蛋白质和脂肪在此阶段消化慢，优先级低。'},
+{id:128,cat:'training',text:'以下哪个属于可变阻力（Variable Resistance）训练器具？',options:['A. 链条（Chains）','B. 弹力带','C. 哑铃','D. 杠铃片'],answer:'A',explanation:'可变阻力：随关节角度/动作进程而改变阻力大小。链条：随提起的链条增多，重量递增，在力量输出最大位置阻力最大——注意弹力带也是可变阻力，哑铃/杠铃是恒定阻力。若选项中有弹力带，两者都对，根据题目选一。'},
+{id:129,cat:'nutrition',text:'一个客户日常饮食以蛋糕、甜甜圈、饼干、意大利面为主，最缺少的营养物质是？',options:['A. 蛋白质','B. 碳水化合物','C. 脂肪','D. 维生素C'],answer:'A',explanation:'列举食物全部是高碳水（精制糖+淀粉）食物，几乎不含优质蛋白质来源（肉、蛋、奶、豆）。蛋白质是构建和修复肌肉、合成酶和激素的必需营养素，该饮食最明显的缺口是蛋白质。'},
+{id:130,cat:'training',text:'抗阻训练时应在哪个阶段呼气？',options:['A. 向心阶段（发力/用力阶段）','B. 离心阶段（还原阶段）','C. 动作中途任意时间','D. 动作顶端停顿时'],answer:'A',explanation:'标准呼吸节律：向心阶段（发力克服阻力，如卧推推起时）→呼气；离心阶段（控制还原，如卧推下放时）→吸气。口诀："用力呼气，还原吸气"。呼气配合腹腔压力释放，辅助发力。'},
+{id:131,cat:'training',text:'以肌肥大为目标的训练，组间休息时间应该是多少？',options:['A. 30-90秒','B. 2-5分钟','C. 5-10分钟','D. 少于15秒'],answer:'A',explanation:'NSCA肌肥大训练参数：组间休息30-90秒。这个较短的休息时间使肌肉在未完全恢复时再次训练，产生更大的代谢压力（乳酸堆积）和合成代谢激素（GH、IGF-1）分泌，有助于肌肥大。'},
+{id:132,cat:'training',text:'减重的一般医学建议是？',options:['A. 6个月内减少10%体重','B. 每周减重0.5-1公斤无上限','C. 3个月内减少20%体重','D. 每月减重5公斤'],answer:'A',explanation:'NSCA和医学界通用建议：减重目标为6个月内减少起始体重的10%，速度约为每周0.5-1kg。过快减重（超过1%/周）会导致大量肌肉流失、代谢率下降和营养缺乏，反弹风险也更高。'},
+{id:133,cat:'special',text:'神经性厌食症（Anorexia Nervosa）的明显体征是？',options:['A. 对寒冷异常敏感（体温调节障碍）','B. 暴饮暴食后呕吐','C. 体重明显超标','D. 骨密度正常'],answer:'A',explanation:'神经性厌食症导致极度营养不良→皮下脂肪消失（隔热层丧失）→体温调节功能受损→对寒冷极度敏感（即使正常温度也感觉很冷）。这是区分厌食症和其他进食障碍的重要体征。'},
+{id:134,cat:'special',text:'女性运动员三联症（Female Athlete Triad）包括哪三个要素？',options:['A. 进食障碍 - 闭经 - 骨质疏松','B. 贫血 - 过度训练 - 体脂过低','C. 骨折 - 闭经 - 低血糖','D. 进食障碍 - 抑郁 - 骨密度降低'],answer:'A',explanation:'女性运动员三联症是三者相互关联的恶性循环：①进食障碍（能量摄入不足）→②雌激素减少→闭经（月经停止）→③骨密度降低→骨质疏松（应力性骨折风险大增）。常见于体操、跑步等强调体型的项目。'},
+{id:135,cat:'training',text:'一客户一年长了7公斤，体脂率30%，静息心率78，想减重。教练制定4周计划，以下哪个目标最贴切？',options:['A. 体脂率降至28%（减少2%）','B. 4周内减重7kg','C. 心率降低10次/分','D. 每天步行1万步'],answer:'A',explanation:'合理目标原则（SMART）：4周内减重7kg（每周1.75kg）过于激进，超出安全减重速率；心率降低10次/分在4周内难以实现；体脂率从30%降至28%（减少2%，约1.4kg纯脂肪）是可实现的短期目标。'},
+{id:136,cat:'legal',text:'客户坚持要做某个医学上的禁忌动作，教练应该怎么做？',options:['A. 签署风险知情协议后执行','B. 换用其他替代动作','C. 拒绝服务该客户','D. 先进行评估再决定'],answer:'B',explanation:'NSCA的立场：私人教练执业范围内不应执行医学禁忌动作，即使客户签署风险协议。签协议不能免除明知故犯的过失责任。正确做法是提供达到相同训练效果的安全替代动作，并解释原因。'},
+{id:137,cat:'training',text:'肌肉耐力训练最多能提高多少最大摄氧量？',options:['A. 约5%','B. 约10%','C. 约40%','D. 几乎不能提高'],answer:'A',explanation:'肌肉耐力训练（如高次数低负荷抗阻训练）对VO₂max的改善非常有限，约5%左右。VO₂max的显著提升主要依赖有氧训练（中等强度有氧可提升15-20%，HIIT可提升更多）。'},
+{id:138,cat:'assessment',text:'生活方式问卷（Lifestyle Questionnaire）主要收集哪些信息？',options:['A. 日常活动水平、职业、睡眠、吸烟饮酒、营养习惯','B. 最大力量和体能测试数据','C. 医疗病史和当前用药情况','D. 体脂率和BMI数据'],answer:'A',explanation:'生活方式问卷是全面了解客户日常生活习惯的工具，涵盖：日常体力活动水平、职业类型（久坐/体力劳动）、睡眠质量、吸烟饮酒情况、饮食习惯和压力水平。这些因素直接影响训练计划设计和行为改变策略。'},
+{id:139,cat:'training',text:'以下哪个属于线性周期化（Linear Periodization）？',options:['A. 肌肥大 → 力量 → 爆发 → 比赛（单向递进）','B. 一周内交替不同训练项目','C. 每次训练随机安排强度','D. 全年保持相同的训练强度'],answer:'A',explanation:'线性周期化：训练阶段按顺序单向推进——从大量/低强度（肌肥大期）→ 中量/中强度（力量期）→ 小量/高强度（爆发力期）→ 比赛/巅峰期。单向不回头，是最经典的周期化模式。'},
+{id:140,cat:'training',text:'仰卧训练时，"五点支撑"的正确描述是？',options:['A. 头后部、上背部及肩后部、下背部及臀部、左脚、右脚','B. 下巴或脸颊一侧、胸部及腹部、髋及大腿前侧、左手、右手','C. 前额、胸部及腹部、髋及大腿前侧、左手、右手','D. 双肩、臀部、左脚跟、右脚跟（四点支撑）'],answer:'A',explanation:'仰卧（仰面朝上）五点支撑：①头后部；②上背部/肩后部；③下背部/臀部（三个背部接触点视为一区）；④左脚；⑤右脚。注意：仰卧保持自然腰椎曲度，下背部不需要完全贴垫。'},
+{id:141,cat:'training',text:'客户做杠铃卧推时，教练应该如何进行保护（Spotting）？',options:['A. 正反握（交替握，一手正握一手反握），手放在杠铃中间','B. 仅握住学员手腕','C. 双手均正握，位于杠铃两端','D. 站在客户头部后方，双手托举杠铃'],answer:'A',explanation:'杠铃卧推保护标准手法：正反握（一手正握+一手反握，防止杠铃滚动）持杠铃中间。这种握法最稳固，一旦客户力竭，教练可以单手用力防止杠铃向一侧倾斜，是最安全的保护方式。'},
+{id:142,cat:'training',text:'以下对超级组（Superset）的正确描述是？',options:['A. 肱二头肌弯举接肱三头肌下压，组间无休息（拮抗肌交替）','B. 杠铃弯举接哑铃弯举，组间无休息（同一肌肉）','C. 深蹲接卧推，组间休息2分钟','D. 任意两个动作交替进行'],answer:'A',explanation:'超级组定义：两个针对拮抗肌群（相互对抗的肌肉）的动作交替进行，组间无休息。肱二头肌弯举（肘屈）+肱三头肌下压（肘伸）是经典组合。同一肌肉无休息交替是"复合组"，不同于超级组。'},
+{id:143,cat:'training',text:'以下哪个对提高步频（Stride Rate）的训练方法描述正确？',options:['A. 原地摆臂、踝关节训练、后踢腿、高抬腿、腿部快速训练、下坡冲刺、牵引跑','B. 上坡冲刺、施阻跑（绳子拉阻力跑）','C. 长距离慢跑、增加步幅','D. 负重背心跑步训练'],answer:'A',explanation:'步频训练目标：提高单位时间内的步数（转速快）。方法包括：原地快速摆臂（节奏感）、踝关节弹跳训练（减少触地时间）、高抬腿/后踢腿、下坡冲刺（顺势加速步频）、牵引跑（被动加速）。上坡/施阻跑侧重步幅（力量）。'},
+{id:144,cat:'special',text:'老年人抗阻训练的阻力和重复次数推荐是？',options:['A. 从10-15RM负荷开始，进阶至8-12RM，能力强者可至4-6RM','B. 始终保持20RM以上的轻重量','C. 从1RM开始，每周10%递增','D. 固定在15RM，不进阶'],answer:'A',explanation:'NSCA老年人抗阻训练进阶建议：①起步使用60-70%1RM（约10-15RM）——建立基础，熟悉动作；②进阶至70-80%（8-12RM）——提高力量；③有能力者进阶至80-90%（4-6RM）——最大化力量增益。循序渐进是关键。'},
+{id:145,cat:'anatomy',text:'以下哪个情况会导致骨盆前倾（Anterior Pelvic Tilt）？',options:['A. 髋屈肌+竖脊肌过紧，核心+腘绳肌+臀大肌无力','B. 腘绳肌过紧，股四头肌无力','C. 腹肌过紧，背肌无力','D. 髋伸肌过紧，髋屈肌无力'],answer:'A',explanation:'骨盆前倾成因（下交叉综合征）：紧张侧——髂腰肌/股直肌（髋屈肌）+竖脊肌向前下拉骨盆；无力侧——腹横肌/腹直肌+腘绳肌+臀大肌无力，无法对抗前拉力。纠正：拉伸髋屈肌，强化核心和臀肌。'},
+{id:146,cat:'training',text:'以下哪个属于非线性（波动）周期化？',options:['A. 肌肥大 → 力量 → 爆发 → 比赛','B. 一周内交替不同训练项目（如周一力量，周三耐力，周五爆发）','C. 全年保持相同的训练刺激','D. 每月改变一次训练重点'],answer:'B',explanation:'非线性/波动周期化：同一周内（甚至同一天不同时段）交替不同的训练刺激（如强度、量、能量系统），频繁变化，与线性单向递进相对。更灵活，适合全年多目标训练或无法长期固定周期的运动员。'},
+{id:147,cat:'training',text:'俯卧训练时，"五点支撑"的正确描述是？',options:['A. 头后部、上背部及肩后部、下背部及臀部、左脚、右脚','B. 下巴或脸颊一侧、胸部及腹部、髋及大腿前侧、左手、右手','C. 前额、胸部及腹部、髋及大腿前侧、左手、右手','D. 膝盖、双手、腹部、颈部、前额'],answer:'B',explanation:'俯卧（俯面朝下）五点支撑：①下巴或脸颊一侧（非正前方）；②胸部及腹部；③髋及大腿前侧；④左手；⑤右手。注意：前额朝下是错误的（会使颈椎过伸）。与仰卧五点完全不同，不要混淆。'},
+{id:148,cat:'training',text:'以下对复合组（Compound Set）的正确描述是？',options:['A. 肱二头肌弯举接肱三头肌下压，组间无休息','B. 杠铃弯举接哑铃弯举，同一肌肉，组间无休息','C. 深蹲接卧推，组间有休息','D. 两个不同肌群动作交替，组间休息90秒'],answer:'B',explanation:'复合组（Compound Set）：针对同一肌肉群的两个不同动作，连续进行，组间无休息。如杠铃弯举→哑铃弯举（均练肱二头肌）。区别于超级组（拮抗肌交替）：超级组=对立肌群，复合组=相同肌群。'},
+{id:149,cat:'training',text:'以下哪个对提高步幅（Stride Length）的训练方法描述正确？',options:['A. 原地摆臂、踝关节训练、后踢腿、高抬腿、下坡冲刺、牵引跑','B. 上坡冲刺（加强髋伸肌力量）、施阻跑（绳子拉阻力跑）','C. 高频短步快速跑训练','D. 降低步频，增加触地时间'],answer:'B',explanation:'步幅训练目标：增大每步的距离（推进力强）。方法：上坡冲刺（强化臀大肌/腘绳肌等髋伸肌，增大后蹬力）；施阻跑（教练/绳子给阻力，跑者需克服阻力，强化推进力量）。与步频训练（速度/节奏）形成明确对比。'}
+];
+
+let currentFilter = 'all';
+let currentPage = 1;
+const PER_PAGE = 10;
+let markedSet = new Set();
+let revealed = new Set();
+let answered = new Map();
+let filteredQuestions = [...QUESTIONS];
+
+const catMap = {
+  nutrition:'营养',anatomy:'解剖/生理',assessment:'评估',
+  training:'训练',legal:'法律/职业',safety:'安全急救',
+  special:'特殊人群',facility:'设施',other:'其他'
+};
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentPage = 1;
+  filterQuestions();
+}
+
+function filterQuestions() {
+  const q = document.getElementById('search').value.toLowerCase();
+  filteredQuestions = QUESTIONS.filter(item => {
+    if (currentFilter === 'marked') return markedSet.has(item.id);
+    if (currentFilter !== 'all' && item.cat !== currentFilter) return false;
+    if (q) return item.text.toLowerCase().includes(q) || item.explanation.toLowerCase().includes(q);
+    return true;
+  });
+  currentPage = 1;
+  render();
+}
+
+function toggleMark(id) {
+  if (markedSet.has(id)) markedSet.delete(id);
+  else markedSet.add(id);
+  document.getElementById('marked-count').textContent = markedSet.size;
+  render();
+}
+
+function toggleExplain(id) {
+  if (revealed.has(id)) revealed.delete(id);
+  else revealed.add(id);
+  render();
+}
+
+function handleAnswer(qid, optLabel) {
+  if (answered.has(qid)) return;
+  answered.set(qid, optLabel);
+  reveal(qid);
+  render();
+}
+
+function reveal(qid) {
+  revealed.add(qid);
+}
+
+function render() {
+  const start = (currentPage - 1) * PER_PAGE;
+  const pageQ = filteredQuestions.slice(start, start + PER_PAGE);
+  const container = document.getElementById('questions-container');
+
+  if (pageQ.length === 0) {
+    container.innerHTML = '<div class="no-results">没有找到相关题目</div>';
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = pageQ.map(q => {
+    const isRevealed = revealed.has(q.id);
+    const userAns = answered.get(q.id);
+    const isMarked = markedSet.has(q.id);
+    const catClass = 'cat-' + q.cat;
+    const catLabel = catMap[q.cat] || q.cat;
+
+    const optionsHtml = q.options.map(opt => {
+      const label = opt.charAt(0);
+      let cls = 'option';
+      if (isRevealed) {
+        if (label === q.answer) cls += ' revealed-correct';
+        else if (userAns === label) cls += ' wrong';
+      }
+      return `<div class="${cls}" onclick="handleAnswer(${q.id},'${label}')">
+        <span class="opt-label">${label}</span>
+        <span>${opt.substring(3)}</span>
+      </div>`;
+    }).join('');
+
+    const explainHtml = isRevealed ? `<div class="explanation">
+      <strong>正确答案：${q.answer}</strong><br>${q.explanation}
+    </div>` : '';
+
+    return `<div class="question-card">
+      <div class="q-header">
+        <span class="q-num">第${q.id}题</span>
+        <span class="q-tag category-tag ${catClass}">${catLabel}</span>
+        <div class="q-text">${q.text}</div>
+      </div>
+      <div class="options">${optionsHtml}</div>
+      <div class="q-actions">
+        <button class="toggle-btn" onclick="toggleExplain(${q.id})">${isRevealed ? '隐藏解析' : '查看解析'}</button>
+        <button class="mark-btn ${isMarked ? 'marked' : ''}" onclick="toggleMark(${q.id})">${isMarked ? '已标记' : '标记'}</button>
+      </div>
+      ${explainHtml}
+    </div>`;
+  }).join('');
+
+  renderPagination();
+}
+
+function renderPagination() {
+  const total = filteredQuestions.length;
+  const totalPages = Math.ceil(total / PER_PAGE);
+  if (totalPages <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
+
+  let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (i===1||i===totalPages||Math.abs(i-currentPage)<=2) {
+      html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+    } else if (Math.abs(i-currentPage)===3) {
+      html += `<span class="page-info">…</span>`;
+    }
+  }
+  html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
+  html += `<span class="page-info">${total}题 / 第${currentPage}/${totalPages}页</span>`;
+  document.getElementById('pagination').innerHTML = html;
+}
+
+function goPage(p) {
+  const total = Math.ceil(filteredQuestions.length / PER_PAGE);
+  if (p < 1 || p > total) return;
+  currentPage = p;
+  render();
+  document.querySelector('.container').scrollIntoView({behavior:'smooth'});
+}
+
+render();
+</script>
